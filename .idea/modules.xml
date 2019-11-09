@@ -3,7 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/WaveParser.iml" filepath="$PROJECT_DIR$/WaveParser.iml" />
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/waveparser/waveparser.iml" filepath="$PROJECT_DIR$/waveparser/waveparser.iml" />
     </modules>
   </component>
 </project>
