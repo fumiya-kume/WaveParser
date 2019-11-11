@@ -23,6 +23,19 @@ android {
         }
     }
 
+    sourceSets {
+        test.resources.srcDirs += 'src/unitTests/res'
+    }
+
+    packagingOptions {
+        exclude("META-INF/LICENSE*")
+    }
+}
+
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
 }
 
 dependencies {
@@ -30,7 +43,10 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'androidx.appcompat:appcompat:1.0.2'
     implementation 'androidx.core:core-ktx:1.0.2'
-    testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'
+
+    androidTestImplementation "org.junit.jupiter:junit-jupiter-api:5.5.2"
+    androidTestImplementation "org.junit.jupiter:junit-jupiter-params:5.5.2"
+    testImplementation("org.junit.jupiter:junit-jupiter:5.5.2")
 }
