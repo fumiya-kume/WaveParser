@@ -38,22 +38,8 @@ data class WaveModel(
     )
 ) {
     companion object {
-        fun loadFromFile(
-            filePath: String
-        ): WaveModel {
-            val file = File(filePath)
-            if (!file.exists()) {
-                throw FileNotFoundException("File not found at $filePath")
-            }
-            val fileByteList = file
-                .readBytes()
 
-            fun RandomAccessFile.readString(count: Int): String {
-                val maxCount = count - 1
-                return (0..maxCount)
-                    .mapIndexed { index, _ -> this.readByte() }
-                    .fold("") { c, c1 -> c + c1.toChar() }
-            }
+        private fun RandomAccessFile.ToWaveModel(): WaveModel {
 
             fun RandomAccessFile.readLittleEndienShort(): Short {
                 return ByteBuffer
@@ -77,35 +63,52 @@ data class WaveModel(
                     .int
             }
 
-            RandomAccessFile(filePath, "r")
-                .run {
-                    val chunkId = this.readLittleEndienInt()
-                    val chunkSize = this.readLittleEndienInt()
-                    val format = Format.of(this.readString(4))
-                    val subChunkId = SubChunkId.of(this.readString(4))
-                    val subChunk1Size = this.readLittleEndienInt()
-                    val audioFormat = AudioFormat.of(this.readLittleEndienShort())
-                    val numChannels: NumChannels = NumChannels.of(this.readLittleEndienShort())
-                    val samplingRate: SamplingRate = SamplingRate.of(this.readLittleEndienInt())
-                    val byteRate = this.readLittleEndienInt()
-                    val blockAlign = this.readLittleEndienShort()
-                    val bitPerSample = this.readLittleEndienShort()
-                    val subChunk2Id = this.readLittleEndienInt()
-                    val subChunk2Size = this.readLittleEndienInt()
+            fun RandomAccessFile.readString(count: Int): String {
+                val maxCount = count - 1
+                return (0..maxCount)
+                    .mapIndexed { index, _ -> this.readByte() }
+                    .fold("") { c, c1 -> c + c1.toChar() }
+            }
 
-                    val fileData =
-                        fileByteList
-                            .copyOfRange(44, fileByteList.size)
-                            .map { it }
+            val chunkId = this.readLittleEndienInt()
+            val chunkSize = this.readLittleEndienInt()
+            val format = Format.of(this.readString(4))
+            val subChunkId = SubChunkId.of(this.readString(4))
+            val subChunk1Size = this.readLittleEndienInt()
+            val audioFormat = AudioFormat.of(this.readLittleEndienShort())
+            val numChannels: NumChannels = NumChannels.of(this.readLittleEndienShort())
+            val samplingRate: SamplingRate = SamplingRate.of(this.readLittleEndienInt())
+            val byteRate = this.readLittleEndienInt()
+            val blockAlign = this.readLittleEndienShort()
+            val bitPerSample = this.readLittleEndienShort()
+            val subChunk2Id = this.readLittleEndienInt()
+            val subChunk2Size = this.readLittleEndienInt()
 
-                    return WaveModel(
-                        data = fileData.map { it.toShort() },
-                        format = format,
-                        audioFormat = audioFormat,
-                        numChannels = numChannels,
-                        samplingRate = samplingRate
-                    )
-                }
+            val dataByteArray = byteArrayOf()
+            this.readFully(dataByteArray)
+
+            val fileData = dataByteArray
+                .copyOfRange(44, dataByteArray.size)
+                .map { it }
+
+            return WaveModel(
+                data = fileData.map { it.toShort() },
+                format = format,
+                audioFormat = audioFormat,
+                numChannels = numChannels,
+                samplingRate = samplingRate
+            )
+        }
+
+        fun loadFromFile(
+            filePath: String
+        ): WaveModel {
+            val file = File(filePath)
+            if (!file.exists()) {
+                throw FileNotFoundException("File not found at $filePath")
+            }
+
+            return RandomAccessFile(filePath, "r").ToWaveModel()
         }
     }
 }
