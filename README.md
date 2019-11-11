@@ -1,6 +1,6 @@
 # WaveParser
 
-＃How to Setup
+＃ How to Setup
 
 ## Step1. Add Mavel Repository in your build.gradle
 
@@ -18,4 +18,13 @@ repositories {
 // Wave Parser Library
 // Replace specific version
 implementation "kuu.nagoya.waveparser:core:0.0.2"
+```
+
+# How to use
+
+```kotlin
+import kuu.nagoya.waveparser.WaveModel
+---
+WaveModel.loadFromFile("/path/to/anyone/")
+// You can access wave file inforamtion, a.k.a data, samplingRate, number of chnnel
 ```
