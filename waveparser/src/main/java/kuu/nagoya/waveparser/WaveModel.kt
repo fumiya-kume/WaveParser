@@ -39,7 +39,7 @@ data class WaveModel(
 ) {
     companion object {
 
-        private fun RandomAccessFile.ToWaveModel(): WaveModel {
+        private fun RandomAccessFile.toWaveModel(): WaveModel {
 
             fun RandomAccessFile.readLittleEndienShort(): Short {
                 return ByteBuffer
@@ -108,7 +108,7 @@ data class WaveModel(
                 throw FileNotFoundException("File not found at $filePath")
             }
 
-            return RandomAccessFile(filePath, "r").ToWaveModel()
+            return RandomAccessFile(filePath, "r").toWaveModel()
         }
     }
 }
