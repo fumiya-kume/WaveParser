@@ -5,7 +5,6 @@ import java.io.FileNotFoundException
 import java.io.RandomAccessFile
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
-import java.util.*
 
 data class WaveModel(
     val data: List<Short>,
@@ -85,14 +84,11 @@ data class WaveModel(
             val subChunk2Id = this.readString(4)
             val subChunk2Size = this.readLittleEndienInt()
 
-            val dataByteArray = byteArrayOf()
-            this.readFully(dataByteArray)
-
             val pointer = this.filePointer
             val fullSize = this.length()
             val dataSize = fullSize - pointer
 
-            val dataByteArray = ByteArray(dataSize.toInt()/numChannels.number.readValue())
+            val dataByteArray = ByteArray(dataSize.toInt() / numChannels.number.readValue())
             this.read(dataByteArray)
 
 

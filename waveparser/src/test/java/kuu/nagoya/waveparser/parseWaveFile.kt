@@ -124,9 +124,9 @@ class parseWaveFile {
 
 
             Assertions.assertArrayEquals(waveModel.chunkId.id, outputFileInfo.chunkId.id)
-            Assertions.assertArrayEquals(
-                waveModel.chunkSize.size.value,
-                outputFileInfo.chunkSize.size.value
+            Assertions.assertEquals(
+                waveModel.chunkSize.size.readValue(),
+                outputFileInfo.chunkSize.size.readValue()
             )
             Assertions.assertArrayEquals(waveModel.format.format, outputFileInfo.format.format)
             Assertions.assertArrayEquals(waveModel.subChunkId.id, outputFileInfo.subChunkId.id)

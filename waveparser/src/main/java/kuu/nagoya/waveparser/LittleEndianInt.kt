@@ -4,7 +4,7 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
 class LittleEndianInt private constructor(
-    private val value: ByteArray
+    val value: ByteArray
 ) {
 
     fun readValue(): Int {
