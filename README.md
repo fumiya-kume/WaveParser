@@ -33,6 +33,10 @@ implementation "kuu.nagoya.waveparser:core:0.0.2"
 ```kotlin
 import kuu.nagoya.waveparser.WaveModel
 ---
-WaveModel.loadFromFile("/path/to/anyone/")
 // You can access wave file inforamtion, a.k.a data, samplingRate, number of chnnel
+WaveModel.loadFromFile("/path/to/anyone/")
+
+// load from storage
+WaveModel.loadFromFile("path/to/anyone)
+
 ```
