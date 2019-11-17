@@ -6,7 +6,7 @@ WaveParser is fluently library for wave file read/write.
 
 - [x] Read Wave File Information
 - [x] Write to Wave File
-- [] validate wave file
+ [] validate wave file
 
 # How to Setup
 
