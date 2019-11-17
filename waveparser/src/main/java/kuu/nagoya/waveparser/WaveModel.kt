@@ -5,6 +5,7 @@ import java.io.FileNotFoundException
 import java.io.RandomAccessFile
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import java.util.*
 
 data class WaveModel(
     val data: List<Short>,
@@ -19,7 +20,7 @@ data class WaveModel(
     val numChannels: NumChannels = NumChannels.of(ChannelNumber.Mono),
     val samplingRate: SamplingRate = SamplingRate.default(),
     val bitPerSample: BitPerSample = BitPerSample.of(BitPerSample.sixteenBit),
-    val bytePerSeccond: BytePerSecond =
+    val byteRate: BytePerSecond =
         BytePerSecond.of(
             samplingRate,
             bitPerSample,
@@ -80,19 +81,36 @@ data class WaveModel(
             val samplingRate: SamplingRate = SamplingRate.of(this.readLittleEndienInt())
             val byteRate = this.readLittleEndienInt()
             val blockAlign = this.readLittleEndienShort()
-            val bitPerSample = this.readLittleEndienShort()
-            val subChunk2Id = this.readLittleEndienInt()
+            val bitPerSample = BitPerSample.of(this.readLittleEndienShort())
+            val subChunk2Id = this.readString(4)
             val subChunk2Size = this.readLittleEndienInt()
 
             val dataByteArray = byteArrayOf()
             this.readFully(dataByteArray)
 
-            val fileData = dataByteArray
-                .copyOfRange(44, dataByteArray.size)
-                .map { it }
+            val pointer = this.filePointer
+            val fullSize = this.length()
+            val dataSize = fullSize - pointer
+
+            val dataByteArray = ByteArray(dataSize.toInt()/numChannels.number.readValue())
+            this.read(dataByteArray)
+
+
+            if (dataByteArray.size <= 44) {
+                return WaveModel(
+                    data = emptyList(),
+                    format = format,
+                    audioFormat = audioFormat,
+                    numChannels = numChannels,
+                    samplingRate = samplingRate,
+                    bitPerSample = bitPerSample
+                )
+            }
+
+
 
             return WaveModel(
-                data = fileData.map { it.toShort() },
+                data = dataByteArray.map { it.toShort() },
                 format = format,
                 audioFormat = audioFormat,
                 numChannels = numChannels,
@@ -109,6 +127,73 @@ data class WaveModel(
             }
 
             return RandomAccessFile(filePath, "r").toWaveModel()
+        }
+
+        fun storeToFile(
+            filePath: String,
+            data: List<Short>,
+            numChannels: NumChannels,
+            byteRate: BytePerSecond,
+            samplingRate: SamplingRate,
+            allowOverrite: Boolean = true
+        ): Boolean {
+            if (!(filePath.endsWith(".wave") || filePath.endsWith(".wav"))) {
+                throw IllegalArgumentException("file is invalid.")
+            }
+
+            val file = File(filePath)
+            if (allowOverrite && file.exists()) {
+                file.delete()
+            }
+
+            val model = WaveModel(
+                data = data,
+                numChannels = numChannels,
+                byteRate = byteRate,
+                samplingRate = samplingRate
+            )
+
+            val randomAccessFile = RandomAccessFile(file, "rw")
+
+            fun RandomAccessFile.writeByteArray(data: ByteArray) {
+                data.forEach { this.writeByte(it.toInt()) }
+            }
+
+            fun RandomAccessFile.writeShortList(shortList: List<Short>) {
+                shortList.forEach { this.writeShort(it.toInt()) }
+            }
+
+            fun RandomAccessFile.writeByteArrayList(dataList: List<ByteArray>) {
+                dataList.forEach {
+                    it.forEach { this.writeByte(it.toInt()) }
+                }
+            }
+
+
+
+            randomAccessFile.writeByteArrayList(
+                listOf(
+                    model.chunkId.id,
+                    model.chunkSize.size.value,
+                    model.format.format,
+                    model.subChunkId.id,
+                    model.subChunk2Size.size.value,
+                    model.audioFormat.formatId,
+                    model.numChannels.number.value,
+                    model.samplingRate.rate.value,
+                    model.byteRate.value.value,
+                    model.blockSize.size.value,
+                    model.bitPerSample.value.value,
+                    model.subChunk2Id.value,
+                    model.subChunk2Size.size.value
+                )
+            )
+
+            randomAccessFile.writeShortList(data)
+
+            randomAccessFile.close()
+
+            return true
         }
     }
 }
@@ -276,6 +361,10 @@ data class BytePerSecond(
             bitPerSample: BitPerSample,
             channelCount: NumChannels
         ): BytePerSecond {
+            // 44100
+            // 16
+            // 2
+            val value = samplingRate.rawValue * (bitPerSample.rawValue / 8) * channelCount.rawNumber
             return BytePerSecond(
                 LittleEndianInt.of(
                     samplingRate.rawValue * (bitPerSample.rawValue / 8) * channelCount.rawNumber
