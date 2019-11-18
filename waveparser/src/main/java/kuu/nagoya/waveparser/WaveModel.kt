@@ -320,6 +320,13 @@ data class NumChannels(
                 channelCount.toInt()
             )
         }
+
+        fun of(channelCount: Int): NumChannels {
+            return NumChannels(
+                LittleEndianShort.of(channelCount.toShort()),
+                channelCount
+            )
+        }
     }
 }
 
