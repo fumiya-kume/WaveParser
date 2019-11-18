@@ -1,4 +1,4 @@
-package kuu.nagoya.waveparser_audiotrack
+package kuu.nagoya.audiotrack
 
 import org.junit.Test
 

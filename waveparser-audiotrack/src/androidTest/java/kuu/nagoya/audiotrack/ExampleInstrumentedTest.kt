@@ -1,4 +1,4 @@
-package kuu.nagoya.waveparser_audiotrack
+package kuu.nagoya.audiotrack
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
