@@ -129,7 +129,7 @@ data class WaveModel(
             filePath: String,
             data: List<Short>,
             numChannels: NumChannels,
-            byteRate: BytePerSecond,
+            bitPerSample: BitPerSample,
             samplingRate: SamplingRate,
             allowOverrite: Boolean = true
         ): Boolean {
@@ -145,7 +145,7 @@ data class WaveModel(
             val model = WaveModel(
                 data = data,
                 numChannels = numChannels,
-                byteRate = byteRate,
+                bitPerSample = bitPerSample,
                 samplingRate = samplingRate
             )
 
