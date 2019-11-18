@@ -1,2 +1,12 @@
 include ':waveparser', ':waveparser-audiotrack'
 rootProject.name = 'WaveParser'
+
+['sample']
+        .asList()
+        .each { folderName ->
+            file(folderName)
+                    .eachDir { dir ->
+                        include dir.name
+                        project(":${dir.name}").projectDir = dir
+                    }
+        }
