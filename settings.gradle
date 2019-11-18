@@ -1,2 +1,2 @@
-include ':waveparser'
+include ':waveparser', ':waveparser-audiotrack'
 rootProject.name = 'WaveParser'
