@@ -56,7 +56,7 @@ uploadArchives {
     repositories {
         mavenDeployer {
             repository url: "file://${repo.absolutePath}"
-            pom.version = '0.0.1'
+            pom.version = '0.0.5'
             pom.groupId = 'kuu.nagoya.waveparser'
             pom.artifactId = 'audiorecord'
         }
