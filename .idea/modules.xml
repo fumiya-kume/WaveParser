@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/WaveParser.iml" filepath="$PROJECT_DIR$/WaveParser.iml" />
       <module fileurl="file://$PROJECT_DIR$/waveparser/waveparser.iml" filepath="$PROJECT_DIR$/waveparser/waveparser.iml" />
+      <module fileurl="file://$PROJECT_DIR$/waveparser-audiotrack/waveparser-audiotrack.iml" filepath="$PROJECT_DIR$/waveparser-audiotrack/waveparser-audiotrack.iml" />
     </modules>
   </component>
 </project>
