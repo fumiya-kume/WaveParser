@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <metadata>
   <groupId>kuu.nagoya.waveparser</groupId>
-  <artifactId>core</artifactId>
+  <artifactId>audiorecord</artifactId>
   <versioning>
     <release>0.0.1</release>
     <versions>
