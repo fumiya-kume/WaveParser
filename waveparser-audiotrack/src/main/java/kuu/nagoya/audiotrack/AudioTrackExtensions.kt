@@ -6,6 +6,7 @@ import kuu.nagoya.waveparser.NumChannels
 import kuu.nagoya.waveparser.SamplingRate
 import kuu.nagoya.waveparser.WaveModel
 import java.nio.ByteBuffer
+import kotlin.math.abs
 
 
 class AudioRecordWithWave(
@@ -27,6 +28,10 @@ class AudioRecordWithWave(
 ) {
     private val audioData: MutableList<Short> = mutableListOf()
     val currentAudioData: MutableList<Short> = mutableListOf()
+    val maxAmplitude = currentAudioData
+        .map { it.toInt() }
+        .map { abs(it) }
+        .max() ?: 0
 
     private val bitPerSample =
         BitPerSample.of(
