@@ -63,7 +63,8 @@ uploadArchives {
             pom.whenConfigured { pom ->
                 pom.dependencies.forEach { dep ->
                     if (dep.getVersion() == "unspecified") {
-                        dep.setVersion(library_version)
+                        dep.version(library_version)
+                        dep.groupId = 'kuu.nagoya.waveparser'
                     }
                 }
             }
