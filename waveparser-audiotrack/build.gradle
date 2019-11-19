@@ -51,7 +51,7 @@ dependencies {
 
 def repo = new File(rootDir, "repository")
 apply plugin: 'maven'
-def library_version = '0.0.6'
+def library_version = '0.0.7'
 
 uploadArchives {
     repositories {
