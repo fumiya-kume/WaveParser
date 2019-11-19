@@ -14,7 +14,7 @@
       <scope>compile</scope>
     </dependency>
     <dependency>
-      <groupId>WaveParser</groupId>
+      <groupId>kuu.nagoya.waveparser</groupId>
       <artifactId>core</artifactId>
       <version>0.1.2</version>
       <scope>compile</scope>
