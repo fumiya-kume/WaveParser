@@ -5,6 +5,7 @@ import kuu.nagoya.waveparser.BitPerSample
 import kuu.nagoya.waveparser.NumChannels
 import kuu.nagoya.waveparser.SamplingRate
 import kuu.nagoya.waveparser.WaveModel
+import java.nio.ByteBuffer
 
 
 class AudioRecordWithWave(
@@ -25,6 +26,8 @@ class AudioRecordWithWave(
     bufferSizeInBytes
 ) {
     private val audioData: MutableList<Short> = mutableListOf()
+    val currentAudioData: MutableList<Short> = mutableListOf()
+
     private val bitPerSample =
         BitPerSample.of(
             when (audioFormat) {
@@ -33,6 +36,26 @@ class AudioRecordWithWave(
                 else -> BitPerSample.sixteenBit
             }
         )
+
+    init {
+        this.setRecordPositionUpdateListener(object : OnRecordPositionUpdateListener {
+            override fun onMarkerReached(recorder: AudioRecord?) {
+                if (recorder == null) {
+                    return
+                }
+                val data = ByteBuffer.allocate(bufferSizeInBytes)
+                recorder.read(data, bufferSizeInBytes)
+                currentAudioData.clear()
+                currentAudioData.addAll(data.asShortBuffer().array().toList())
+                audioData += data.asShortBuffer().array().toList()
+            }
+
+            override fun onPeriodicNotification(recorder: AudioRecord?) {
+
+            }
+
+        })
+    }
 
     override fun startRecording() {
         audioData.clear()
