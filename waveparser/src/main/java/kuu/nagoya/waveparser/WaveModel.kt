@@ -19,7 +19,7 @@ data class WaveModel(
     val numChannels: NumChannels = NumChannels.of(ChannelNumber.Mono),
     val samplingRate: SamplingRate = SamplingRate.default(),
     val bitPerSample: BitPerSample = BitPerSample.of(BitPerSample.sixteenBit),
-    val bytePerSeccond: BytePerSecond =
+    val byteRate: BytePerSecond =
         BytePerSecond.of(
             samplingRate,
             bitPerSample,
@@ -38,22 +38,8 @@ data class WaveModel(
     )
 ) {
     companion object {
-        fun loadFromFile(
-            filePath: String
-        ): WaveModel {
-            val file = File(filePath)
-            if (!file.exists()) {
-                throw FileNotFoundException("File not found at $filePath")
-            }
-            val fileByteList = file
-                .readBytes()
 
-            fun RandomAccessFile.readString(count: Int): String {
-                val maxCount = count - 1
-                return (0..maxCount)
-                    .mapIndexed { index, _ -> this.readByte() }
-                    .fold("") { c, c1 -> c + c1.toChar() }
-            }
+        private fun RandomAccessFile.toWaveModel(): WaveModel {
 
             fun RandomAccessFile.readLittleEndienShort(): Short {
                 return ByteBuffer
@@ -77,35 +63,133 @@ data class WaveModel(
                     .int
             }
 
-            RandomAccessFile(filePath, "r")
-                .run {
-                    val chunkId = this.readLittleEndienInt()
-                    val chunkSize = this.readLittleEndienInt()
-                    val format = Format.of(this.readString(4))
-                    val subChunkId = SubChunkId.of(this.readString(4))
-                    val subChunk1Size = this.readLittleEndienInt()
-                    val audioFormat = AudioFormat.of(this.readLittleEndienShort())
-                    val numChannels: NumChannels = NumChannels.of(this.readLittleEndienShort())
-                    val samplingRate: SamplingRate = SamplingRate.of(this.readLittleEndienInt())
-                    val byteRate = this.readLittleEndienInt()
-                    val blockAlign = this.readLittleEndienShort()
-                    val bitPerSample = this.readLittleEndienShort()
-                    val subChunk2Id = this.readLittleEndienInt()
-                    val subChunk2Size = this.readLittleEndienInt()
+            fun RandomAccessFile.readString(count: Int): String {
+                val maxCount = count - 1
+                return (0..maxCount)
+                    .mapIndexed { index, _ -> this.readByte() }
+                    .fold("") { c, c1 -> c + c1.toChar() }
+            }
 
-                    val fileData =
-                        fileByteList
-                            .copyOfRange(44, fileByteList.size)
-                            .map { it }
+            val chunkId = this.readLittleEndienInt()
+            val chunkSize = this.readLittleEndienInt()
+            val format = Format.of(this.readString(4))
+            val subChunkId = SubChunkId.of(this.readString(4))
+            val subChunk1Size = this.readLittleEndienInt()
+            val audioFormat = AudioFormat.of(this.readLittleEndienShort())
+            val numChannels: NumChannels = NumChannels.of(this.readLittleEndienShort())
+            val samplingRate: SamplingRate = SamplingRate.of(this.readLittleEndienInt())
+            val byteRate = this.readLittleEndienInt()
+            val blockAlign = this.readLittleEndienShort()
+            val bitPerSample = BitPerSample.of(this.readLittleEndienShort())
+            val subChunk2Id = this.readString(4)
+            val subChunk2Size = this.readLittleEndienInt()
 
-                    return WaveModel(
-                        data = fileData.map { it.toShort() },
-                        format = format,
-                        audioFormat = audioFormat,
-                        numChannels = numChannels,
-                        samplingRate = samplingRate
-                    )
+            val pointer = this.filePointer
+            val fullSize = this.length()
+            val dataSize = fullSize - pointer
+
+            val dataByteArray = ByteArray(dataSize.toInt() / numChannels.number.readValue())
+            this.read(dataByteArray)
+
+
+            if (dataByteArray.size <= 44) {
+                return WaveModel(
+                    data = emptyList(),
+                    format = format,
+                    audioFormat = audioFormat,
+                    numChannels = numChannels,
+                    samplingRate = samplingRate,
+                    bitPerSample = bitPerSample
+                )
+            }
+
+
+
+            return WaveModel(
+                data = dataByteArray.map { it.toShort() },
+                format = format,
+                audioFormat = audioFormat,
+                numChannels = numChannels,
+                samplingRate = samplingRate
+            )
+        }
+
+        fun loadFromFile(
+            filePath: String
+        ): WaveModel {
+            val file = File(filePath)
+            if (!file.exists()) {
+                throw FileNotFoundException("File not found at $filePath")
+            }
+
+            return RandomAccessFile(filePath, "r").toWaveModel()
+        }
+
+        fun storeToFile(
+            filePath: String,
+            data: List<Short>,
+            numChannels: NumChannels,
+            bitPerSample: BitPerSample,
+            samplingRate: SamplingRate,
+            allowOverrite: Boolean = true
+        ): Boolean {
+            if (!(filePath.endsWith(".wave") || filePath.endsWith(".wav"))) {
+                throw IllegalArgumentException("file is invalid.")
+            }
+
+            val file = File(filePath)
+            if (allowOverrite && file.exists()) {
+                file.delete()
+            }
+
+            val model = WaveModel(
+                data = data,
+                numChannels = numChannels,
+                bitPerSample = bitPerSample,
+                samplingRate = samplingRate
+            )
+
+            val randomAccessFile = RandomAccessFile(file, "rw")
+
+            fun RandomAccessFile.writeByteArray(data: ByteArray) {
+                data.forEach { this.writeByte(it.toInt()) }
+            }
+
+            fun RandomAccessFile.writeShortList(shortList: List<Short>) {
+                shortList.forEach { this.writeShort(it.toInt()) }
+            }
+
+            fun RandomAccessFile.writeByteArrayList(dataList: List<ByteArray>) {
+                dataList.forEach {
+                    it.forEach { this.writeByte(it.toInt()) }
                 }
+            }
+
+
+
+            randomAccessFile.writeByteArrayList(
+                listOf(
+                    model.chunkId.id,
+                    model.chunkSize.size.value,
+                    model.format.format,
+                    model.subChunkId.id,
+                    model.subChunk2Size.size.value,
+                    model.audioFormat.formatId,
+                    model.numChannels.number.value,
+                    model.samplingRate.rate.value,
+                    model.byteRate.value.value,
+                    model.blockSize.size.value,
+                    model.bitPerSample.value.value,
+                    model.subChunk2Id.value,
+                    model.subChunk2Size.size.value
+                )
+            )
+
+            randomAccessFile.writeShortList(data)
+
+            randomAccessFile.close()
+
+            return true
         }
     }
 }
@@ -236,6 +320,13 @@ data class NumChannels(
                 channelCount.toInt()
             )
         }
+
+        fun of(channelCount: Int): NumChannels {
+            return NumChannels(
+                LittleEndianShort.of(channelCount.toShort()),
+                channelCount
+            )
+        }
     }
 }
 
@@ -273,6 +364,10 @@ data class BytePerSecond(
             bitPerSample: BitPerSample,
             channelCount: NumChannels
         ): BytePerSecond {
+            // 44100
+            // 16
+            // 2
+            val value = samplingRate.rawValue * (bitPerSample.rawValue / 8) * channelCount.rawNumber
             return BytePerSecond(
                 LittleEndianInt.of(
                     samplingRate.rawValue * (bitPerSample.rawValue / 8) * channelCount.rawNumber

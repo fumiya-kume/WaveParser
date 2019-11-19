@@ -51,11 +51,7 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation 'androidx.appcompat:appcompat:1.0.2'
-    implementation 'androidx.core:core-ktx:1.0.2'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.0'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
 
     androidTestImplementation "org.junit.jupiter:junit-jupiter-api:5.5.2"
     androidTestImplementation "org.junit.jupiter:junit-jupiter-params:5.5.2"
@@ -65,12 +61,13 @@ dependencies {
 def repo = new File(rootDir, "repository")
 
 apply plugin: 'maven'
+def library_version = '0.0.6'
 
 uploadArchives {
     repositories {
         mavenDeployer {
             repository url: "file://${repo.absolutePath}"
-            pom.version = '0.0.1'
+            pom.version = library_version
             pom.groupId = 'kuu.nagoya.waveparser'
             pom.artifactId = 'core'
         }
