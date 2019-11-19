@@ -28,7 +28,7 @@ class AudioRecordWithWave(
 ) {
     private val audioData: MutableList<Short> = mutableListOf()
     val currentAudioData: MutableList<Short> = mutableListOf()
-    private var maxAmplitude = 0
+    var maxAmplitude = 0
 
     private val bitPerSample =
         BitPerSample.of(
