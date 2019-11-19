@@ -28,10 +28,7 @@ class AudioRecordWithWave(
 ) {
     private val audioData: MutableList<Short> = mutableListOf()
     val currentAudioData: MutableList<Short> = mutableListOf()
-    val maxAmplitude = currentAudioData
-        .map { it.toInt() }
-        .map { abs(it) }
-        .max() ?: 0
+    private var maxAmplitude = 0
 
     private val bitPerSample =
         BitPerSample.of(
@@ -52,6 +49,12 @@ class AudioRecordWithWave(
                 recorder.read(data, bufferSizeInBytes)
                 currentAudioData.clear()
                 currentAudioData.addAll(data.asShortBuffer().array().toList())
+
+                maxAmplitude = currentAudioData
+                    .map { it.toInt() }
+                    .map { abs(it) }
+                    .max() ?: 0
+
                 audioData += data.asShortBuffer().array().toList()
             }
 
