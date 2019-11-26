@@ -1,47 +1,4 @@
-apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
-android {
-    compileSdkVersion 29
-    buildToolsVersion "29.0.2"
-
-
-    defaultConfig {
-        minSdkVersion 22
-        targetSdkVersion 29
-        versionCode 1
-        versionName "1.0"
-
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles 'consumer-rules.pro'
-    }
-
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-        }
-    }
-
-    sourceSets {
-        test.resources.srcDirs += 'src/unitTests/res'
-    }
-
-    packagingOptions {
-        exclude("META-INF/LICENSE*")
-    }
-
-    libraryVariants.all { variant ->
-        variant.outputs.all { output ->
-            output.packageLibrary.exclude("libs/*")
-            if (variant.name == android.buildTypes.release.name) {
-                outputFileName = output.outputFile.name.replace(("-release.aar"), "-${version}.aar")
-            } else if (variant.name == android.buildTypes.debug.name) {
-                outputFileName = output.outputFile.name.replace((".aar"), "-${version}.aar")
-            }
-        }
-    }
-}
+apply plugin: 'kotlin'
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
     kotlinOptions {
@@ -52,16 +9,13 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-
-    androidTestImplementation "org.junit.jupiter:junit-jupiter-api:5.5.2"
-    androidTestImplementation "org.junit.jupiter:junit-jupiter-params:5.5.2"
     testImplementation("org.junit.jupiter:junit-jupiter:5.5.2")
 }
 
 def repo = new File(rootDir, "repository")
 
 apply plugin: 'maven'
-def library_version = '0.0.7'
+def library_version = '0.0.10'
 
 uploadArchives {
     repositories {
